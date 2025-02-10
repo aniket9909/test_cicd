@@ -3,46 +3,54 @@ name: Auto Pull Dev Branch
 on:
   push:
     branches:
-      - main  # Runs only when pushing to the 'main' branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub Actions Runner
+    runs-on: ubuntu-latest # This specifies that the job will run on an Ubuntu virtual machine provided by GitHub Actions
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 🔑 Setup SSH Key for Secure Connection
+      - name: Verify SSH_PRIVATE_KEY
+        run: |
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "SSH_PRIVATE_KEY is not set."
+            exit 1
+          else
+            echo "SSH_PRIVATE_KEY is set."
+          fi
+
+      - name: Verify SERVER_IP
+        run: |
+          if [ -z "${{ secrets.SERVER_IP }}" ]; then
+            echo "SERVER_IP is not set."
+            exit 1
+          else
+            echo "SERVER_IP is set."
+          fi
+
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
 
-      # 🛠️ Test SSH Connection (Debugging Step)
-      - name: Test SSH Connection
+      - name: Test SSH Key Setup
         run: |
-          ssh -vvv ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo SSH connection established"
+          echo "SSH key content:"
+          cat ~/.ssh/id_rsa
+          echo "Directory listing:"
+          ls -la ~/.ssh
+          echo "Testing SSH connection:"
+          ssh -vvv giri@${{ secrets.SERVER_IP }} "echo SSH connection established"
 
-      # 📂 Verify the Remote Directory Exists
       - name: Verify Remote Directory
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && pwd && ls -la"
+          ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && pwd && ls -la"
 
-      # 🔄 Pull Latest Code from `main` Branch
       - name: Pull Latest Code on Server
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /var/www/html/test_cicd
-            git fetch --all
-            git reset --hard origin/main  # Ensures a clean pull
-            git pull origin main
-          EOF
-
-      # 🛠️ Restart Web Server (Optional)
-      - name: Restart Web Server (Apache/Nginx)
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "sudo systemctl restart apache2 || sudo systemctl restart nginx"
+          ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && git status && git pull origin main"
