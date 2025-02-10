@@ -22,4 +22,4 @@ jobs:
 
       - name: Pull Latest Code on Server
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /var/www/test_cicd  && git pull origin main"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd  && git pull origin main"
