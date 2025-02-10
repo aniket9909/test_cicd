@@ -21,12 +21,12 @@ jobs:
 
       - name: Test SSH Connection
         run: |
-          ssh -vvv giri@${{ secrets.SERVER_IP }} "echo SSH connection established"
+          ssh  giri@192.168.1.115 "echo SSH connection established"
 
       - name: Verify Remote Directory
         run: |
-          ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && pwd && ls -la"
+          ssh giri@192.168.1.115 "cd /var/www/html/test_cicd && pwd && ls -la"
 
       - name: Pull Latest Code on Server
         run: |
-          ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && git status && git pull origin main"
+          ssh giri@192.168.1.115 "cd /var/www/html/test_cicd && git status && git pull origin main"
