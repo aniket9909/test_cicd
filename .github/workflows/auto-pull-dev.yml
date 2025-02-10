@@ -34,9 +34,8 @@ jobs:
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5Q0krjxrgSgeAB2jdt/iHMJs7l54/6t39SEkWhyqUR/Yat71NEqL6dZW37sM8l3FJIg9zRBNwKBB2yL2NeYDoikoI/Xwma3bK9AXwH2hc9QgsNcDexyCK5nU9knNpRhTmOmFLaYHlsbNopuUYEd+2P/cT04y+aAlqYfKj+idD9DV961hZ493EwxzbBS6u44WPIlCqOQa/X9jWGnisv+TheeAHCpwapcWcOA7GzW3blEvY7c3By/GvxLGYStOhf3KiVZN/VkPlsy7okN2p8It60IYXnB3W9DTio7LucVVeahCDuCYpdHjm9GRpHonDhmb/5Gbq2+prE8Z0zyRgA3P7JakOEbVnrNOlNZl74RJwnaHlqN/e9BLBWjxNFc0TS3GVw5NZ6BJZmL5jd4RyQ1e7hLHZL+BJY3gPNwaq8IeimSrRMEb/Ds2G6ZpNK5DwqIFPp2+WFaZ6t6xDu+dXpUn/KNio8D96o1VsOcnn+I9dKxfxvrCJQQxQwgj6co+fvZ8RQM+UWT0UaeMCkganWSqL1bx5nVq46enHvtla2mvD3wnUTISNbWgbZJcIUffZc4E8jsLss0+jBhoLYvwP4J3mqR3tk8hUWxhUxdbbjUYZ1H3hBygVL+Ji29aLVGfZRVmW+RVvdOYrUaOWMuv/02FTIT04qoRRdgeArRjlz01j/w== aniket@globalspace.co.in" >> ~/.ssh/authorized_keys
+          chmod 600 ~/.ssh/authorized_keys
 
       - name: Test SSH Key Setup
         run: |
@@ -46,11 +45,14 @@ jobs:
           ls -la ~/.ssh
           echo "Testing SSH connection:"
           ssh -vvv giri@${{ secrets.SERVER_IP }} "echo SSH connection established"
+          shell: /usr/bin/bash -e
 
       - name: Verify Remote Directory
         run: |
           ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && pwd && ls -la"
+          shell: /usr/bin/bash -e
 
       - name: Pull Latest Code on Server
         run: |
           ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && git status && git pull origin main"
+          shell: /usr/bin/bash -e
