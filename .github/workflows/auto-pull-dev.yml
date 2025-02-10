@@ -4,15 +4,30 @@ on:
   push:
     branches:
       - main
-
+      
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # This specifies that the job will run on an Ubuntu virtual machine provided by GitHub Actions
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Test SSH Connection
+        run: |
+          ssh -vvv giri@${{ secrets.SERVER_IP }} "echo SSH connection established"
+
+      - name: Verify Remote Directory
+        run: |
+          ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && pwd && ls -la"
+
       - name: Pull Latest Code on Server
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd  && git pull origin main"
+          ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && git status && git pull origin main"
