@@ -39,7 +39,7 @@ jobs:
 
       - name: Verify Remote Directory
         run: |
-          ssh giri@${{ secrets.SERVER_IP }} "cd /var/www/html/test_cicd && pwd && ls -la"
+          ssh giri@192.168.1.115 "cd /var/www/html/test_cicd && pwd && ls -la"
           shell: /usr/bin/bash -e
 
       - name: Pull Latest Code on Server
