@@ -19,4 +19,4 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Pull latest changes on local machine
-        run: ssh -o StrictHostKeyChecking=no andy@192.168.1.91 'cd ~/codes/CICD && git pull origin main'
+        run: ssh -o StrictHostKeyChecking=no azureuser@20.207.245.196 'cd ~/codes/CICD && git pull origin main'
