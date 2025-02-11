@@ -1,4 +1,4 @@
-name: Auto Pull Dev Branch
+name: Auto Pull on Push to Main
 
 on:
   push:
@@ -6,47 +6,17 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest # This specifies that the job will run on an Ubuntu virtual machine provided by GitHub Actions
+  auto-pull:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Verify SSH_PRIVATE_KEY
-        run: |
-          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
-            echo "SSH_PRIVATE_KEY is not set."
-            exit 1
-          else
-            echo "SSH_PRIVATE_KEY is set."
-          fi
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Verify SERVER_IP
-        run: |
-          if [ -z "${{ secrets.SERVER_IP }}" ]; then
-            echo "SERVER_IP is not set."
-            exit 1
-          else
-            echo "SERVER_IP is set."
-          fi
-
-      - name: Setup SSH Key
-        run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Test SSH Key Setup
-        run: |
-          echo "SSH key content:"
-          cat ~/.ssh/id_rsa
-          echo "Directory listing:"
-          ls -la ~/.ssh
-          echo "Testing SSH connection:"
-          ssh -vvv andy@${{ secrets.SERVER_IP }} "echo SSH connection established"
-
-      - name: Pull Latest Code on Server
-        run: |
-          ssh andy@${{ secrets.SERVER_IP }} "cd ~/codes/CICD && git status && git pull origin main"
+      - name: Pull latest changes on remote system
+        run: ssh -o StrictHostKeyChecking=no andy@192.168.1.91 'cd ~/codes/CICD && git pull origin main'
