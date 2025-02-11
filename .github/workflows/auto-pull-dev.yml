@@ -18,5 +18,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Test network connectivity
+        run: |
+          ping -c 4 192.168.1.91
+          traceroute 192.168.1.91
+
       - name: Pull latest changes on remote system
         run: ssh -o StrictHostKeyChecking=no andy@192.168.1.91 'cd ~/codes/CICD && git pull origin main'
